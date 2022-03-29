@@ -1,6 +1,6 @@
-pub(crate) mod geo_json;
-
-use crate::geo_json::GeoJSON;
+// pub(crate) mod geo_json;
+//
+// use crate::geo_json::GeoJSON;
 use futures::stream::StreamExt;
 use mongodb::bson;
 use mongodb::{error, options::ClientOptions, options::Tls::Enabled, options::TlsOptions, Client};
@@ -60,7 +60,7 @@ pub async fn get_all_docs(db_name: String, db_collection: String) -> Result<JsVa
 
     let js_value = JsValue::from_str(deserialize.as_str());
 
-    let promise = js_sys::Promise::resolve(js_value);
+    let promise = js_sys::Promise::resolve(&js_value);
     let result = wasm_bindgen_futures::JsFuture::from(promise).await;
 
     return result;
