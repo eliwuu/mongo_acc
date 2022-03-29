@@ -46,7 +46,7 @@ pub async fn get_collection(
 pub async fn get_all_docs(db_name: String, db_collection: String) -> Result<JsValue, JsValue> {
     let client = get_client().await;
     let db = client.database(db_name.as_str());
-    let collection: mongodb::Collection<GeoJSON> = db.collection(db_collection.as_str());
+    let collection: mongodb::Collection<Document> = db.collection(db_collection.as_str());
 
     let get_all = collection
         .find(None, None)
@@ -55,9 +55,12 @@ pub async fn get_all_docs(db_name: String, db_collection: String) -> Result<JsVa
     
     let data: Vec<error::Result<Document>> = get_all.collect().await;
 
+
     let deserialize = serde_json::to_string(&data).unwrap();
 
-    let promise = js_sys::Promise::resolve(deserialize.as_str());
+    let js_value = JsValue::from_str(deserialize.as_str());
+
+    let promise = js_sys::Promise::resolve(js_value);
     let result = wasm_bindgen_futures::JsFuture::from(promise).await;
 
     return result;
