@@ -1,11 +1,10 @@
-// pub(crate) mod geo_json;
-//
-// use crate::geo_json::GeoJSON;
+pub(crate) mod geo_json;
+
+use crate::geo_json::GeoJSON;
 use futures::stream::StreamExt;
 use mongodb::bson;
-use mongodb::{error, options::ClientOptions, options::Tls::Enabled, options::TlsOptions, Client};
+use mongodb::{ error, options::ClientOptions, options::Tls::Enabled, options::TlsOptions, Client};
 use std::path::PathBuf;
-use bson::Document;
 use wasm_bindgen::prelude::*;
 
 async fn get_client() -> Client {
@@ -46,17 +45,18 @@ pub async fn get_collection(
 pub async fn get_all_docs(db_name: String, db_collection: String) -> Result<JsValue, JsValue> {
     let client = get_client().await;
     let db = client.database(db_name.as_str());
-    let collection: mongodb::Collection<Document> = db.collection(db_collection.as_str());
+    let collection: mongodb::Collection<GeoJSON> = db.collection(db_collection.as_str());
 
     let get_all = collection
         .find(None, None)
         .await
         .expect("Failed to get all documents");
     
-    let data: Vec<error::Result<Document>> = get_all.collect().await;
+    let data= get_all.collect::<Vec<error::Result<GeoJSON>>>().await;
 
+    let ls = data.into_iter().map(|x| Ok(x)).collect::<Vec<GeoJSON>>();
 
-    let deserialize = serde_json::to_string(&data).unwrap();
+    let deserialize = serde_json::to_string(&ls).unwrap();
 
     let js_value = JsValue::from_str(deserialize.as_str());
 
