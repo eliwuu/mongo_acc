@@ -54,7 +54,7 @@ pub async fn get_all_docs(db_name: String, db_collection: String) -> Result<JsVa
     
     let data= get_all.collect::<Vec<error::Result<GeoJSON>>>().await;
 
-    let ls = data.into_iter().map(|x| Ok(x)).collect::<Vec<GeoJSON>>();
+    let ls = data.into_iter().map(|x| x.expect("no data")).collect::<Vec<GeoJSON>>();
 
     let deserialize = serde_json::to_string(&ls).unwrap();
 
